@@ -145,11 +145,5 @@ class AuditLogOut(BaseModel):
     actor: str | None
     created_at: dt.datetime
 
-
-class DashboardSummary(BaseModel):
-    product_count: int
-    lot_count: int
-    total_qty: int
-
     class Config:
         from_attributes = True

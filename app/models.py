@@ -1,20 +1,14 @@
 from __future__ import annotations
 
-from __future__ import annotations
-
 import datetime as dt
 from enum import Enum
 
-from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, event, func
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql import DDL
 from sqlalchemy.types import JSON
 
 from app.db import Base
-
-Base.registry.dispose()
-Base.metadata.clear()
 
 
 class ProductGroup(Base):
@@ -84,18 +78,6 @@ class InventoryTx(Base):
 
     product: Mapped[Product] = relationship()
     lot: Mapped[Lot] = relationship()
-
-
-inventory_tx_delete_block = DDL(
-    """
-    CREATE TRIGGER IF NOT EXISTS inventory_tx_no_delete
-    BEFORE DELETE ON inventory_tx
-    BEGIN
-        SELECT RAISE(FAIL, 'Deletion forbidden for inventory_tx');
-    END;
-    """
-)
-event.listen(InventoryTx.__table__, "after_create", inventory_tx_delete_block)
 
 
 class InventoryBalance(Base):

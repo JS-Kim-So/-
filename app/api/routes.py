@@ -16,18 +16,6 @@ router = APIRouter()
 def _handle_value_error(exc: ValueError) -> HTTPException:
     return HTTPException(status_code=400, detail=str(exc))
 
-
-def _transaction_context(db: Session):
-    return db.begin_nested() if db.in_transaction() else db.begin()
-
-
-@router.get("/dashboard/summary", response_model=schemas.DashboardSummary)
-def dashboard_summary(db: Session = Depends(get_db)):
-    product_count = db.scalar(select(func.count(models.Product.product_id))) or 0
-    lot_count = db.scalar(select(func.count(models.Lot.lot_id))) or 0
-    total_qty = db.scalar(select(func.coalesce(func.sum(models.InventoryBalance.qty_on_hand), 0))) or 0
-    return schemas.DashboardSummary(product_count=product_count, lot_count=lot_count, total_qty=total_qty)
-
 @router.post("/product-groups", response_model=schemas.ProductGroupOut, status_code=status.HTTP_201_CREATED)
 def create_product_group(payload: schemas.ProductGroupCreate, db: Session = Depends(get_db)):
     group = models.ProductGroup(**payload.model_dump())
@@ -200,7 +188,7 @@ def create_inbound(payload: schemas.InventoryInCreate, db: Session = Depends(get
         raise _handle_value_error(exc) from exc
     if lot.product_id != payload.product_id:
         raise HTTPException(status_code=400, detail="Lot does not match product")
-    with _transaction_context(db):
+    with db.begin():
         tx = models.InventoryTx(
             tx_type=models.TxType.IN.value,
             tx_datetime=dt.datetime.utcnow(),
@@ -247,7 +235,7 @@ def create_outbound(payload: schemas.InventoryOutCreate, db: Session = Depends(g
             status_code=status.HTTP_409_CONFLICT,
             detail={"message": "Insufficient stock", "current_qty": current_qty, "requires_confirm": True},
         )
-    with _transaction_context(db):
+    with db.begin():
         tx = models.InventoryTx(
             tx_type=models.TxType.OUT.value,
             tx_datetime=dt.datetime.utcnow(),
@@ -323,7 +311,7 @@ def update_transaction(tx_id: int, payload: schemas.InventoryTxUpdate, db: Sessi
         "note": tx.note,
     }
 
-    with _transaction_context(db):
+    with db.begin():
         for key, value in update_data.items():
             if key == "reason":
                 continue
