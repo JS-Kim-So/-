@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>입고 등록</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand">재고 관리</div>
+        <nav>
+            <a href="/" data-page="dashboard">대시보드</a>
+            <a href="/ui/products" data-page="products">제품 관리</a>
+            <a href="/ui/lots" data-page="lots">로트 관리</a>
+            <a href="/ui/inbound" data-page="inbound">입고 등록</a>
+            <a href="/ui/outbound" data-page="outbound">출고 등록</a>
+            <a href="/ui/transactions" data-page="transactions">입출고 이력</a>
+            <a href="/docs" target="_blank">API 문서</a>
+        </nav>
+    </aside>
+    <main class="content">
+        <h1 class="page-title">입고 등록</h1>
+        <div class="card">
+            <form id="inbound-form" class="form-row">
+                <div>
+                    <div class="label">제품 *</div>
+                    <select id="in-product" required></select>
+                </div>
+                <div>
+                    <div class="label">로트 *</div>
+                    <select id="in-lot" required></select>
+                </div>
+                <div>
+                    <div class="label">수량 *</div>
+                    <input type="number" id="in-qty" min="1" required>
+                </div>
+                <div>
+                    <div class="label">참고 전표</div>
+                    <input type="text" id="in-ref" placeholder="선택 입력">
+                </div>
+                <div>
+                    <div class="label">메모</div>
+                    <input type="text" id="in-note" placeholder="선택 입력">
+                </div>
+                <div class="actions">
+                    <button type="submit">입고 저장</button>
+                </div>
+            </form>
+            <div id="in-message"></div>
+        </div>
+    </main>
+</div>
+<script>
+const currentPath = window.location.pathname;
+document.querySelectorAll('.sidebar a').forEach(link => {
+    if (link.getAttribute('href') === currentPath) link.classList.add('active');
+});
+
+const inMessage = document.getElementById('in-message');
+const inProduct = document.getElementById('in-product');
+const inLot = document.getElementById('in-lot');
+
+function showMessage(target, text, type='success') {
+    target.innerHTML = `<div class="message ${type}">${text}</div>`;
+}
+
+async function loadProducts() {
+    const res = await fetch('/products?is_active=true');
+    const products = await res.json();
+    inProduct.innerHTML = '';
+    products.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.product_id;
+        option.textContent = `${p.product_code} - ${p.product_name}`;
+        inProduct.appendChild(option);
+    });
+    if (products.length) {
+        loadLots(products[0].product_id);
+    }
+}
+
+async function loadLots(productId) {
+    inLot.innerHTML = '';
+    const res = await fetch(`/lots?product_id=${productId}&is_active=true`);
+    const lots = await res.json();
+    lots.forEach(l => {
+        const option = document.createElement('option');
+        option.value = l.lot_id;
+        option.textContent = `${l.mfg_date} / ${l.lot_no}`;
+        inLot.appendChild(option);
+    });
+}
+
+inProduct.addEventListener('change', (e) => loadLots(e.target.value));
+
+document.getElementById('inbound-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const qty = parseInt(document.getElementById('in-qty').value, 10);
+    if (!Number.isInteger(qty) || qty < 1) {
+        return showMessage(inMessage, '수량은 1 이상 정수여야 합니다.', 'error');
+    }
+    const payload = {
+        product_id: parseInt(inProduct.value, 10),
+        lot_id: parseInt(inLot.value, 10),
+        qty,
+        ref_doc: document.getElementById('in-ref').value.trim() || null,
+        note: document.getElementById('in-note').value.trim() || null,
+    };
+    if (!payload.product_id || !payload.lot_id) {
+        return showMessage(inMessage, '필수 항목을 입력하세요.', 'error');
+    }
+    const res = await fetch('/inventory/in', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+    if (res.ok) {
+        showMessage(inMessage, '입고가 저장되었습니다.');
+        document.getElementById('in-qty').value = '';
+    } else {
+        showMessage(inMessage, '요청 처리 중 오류가 발생했습니다.', 'error');
+    }
+});
+
+loadProducts();
+</script>
+</body>
+</html>
