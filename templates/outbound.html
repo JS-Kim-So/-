@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>출고 등록</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand">재고 관리</div>
+        <nav>
+            <a href="/" data-page="dashboard">대시보드</a>
+            <a href="/ui/products" data-page="products">제품 관리</a>
+            <a href="/ui/lots" data-page="lots">로트 관리</a>
+            <a href="/ui/inbound" data-page="inbound">입고 등록</a>
+            <a href="/ui/outbound" data-page="outbound">출고 등록</a>
+            <a href="/ui/transactions" data-page="transactions">입출고 이력</a>
+            <a href="/docs" target="_blank">API 문서</a>
+        </nav>
+    </aside>
+    <main class="content">
+        <h1 class="page-title">출고 등록</h1>
+        <div class="card">
+            <form id="outbound-form" class="form-row">
+                <div>
+                    <div class="label">제품 *</div>
+                    <select id="out-product" required></select>
+                </div>
+                <div>
+                    <div class="label">로트 *</div>
+                    <select id="out-lot" required></select>
+                </div>
+                <div>
+                    <div class="label">수량 *</div>
+                    <input type="number" id="out-qty" min="1" required>
+                </div>
+                <div>
+                    <div class="label">참고 전표</div>
+                    <input type="text" id="out-ref" placeholder="선택 입력">
+                </div>
+                <div>
+                    <div class="label">메모</div>
+                    <input type="text" id="out-note" placeholder="선택 입력">
+                </div>
+                <div class="actions">
+                    <button type="submit">출고 저장</button>
+                </div>
+            </form>
+            <div id="out-message"></div>
+        </div>
+    </main>
+</div>
+<script>
+const currentPath = window.location.pathname;
+document.querySelectorAll('.sidebar a').forEach(link => {
+    if (link.getAttribute('href') === currentPath) link.classList.add('active');
+});
+
+const outMessage = document.getElementById('out-message');
+const outProduct = document.getElementById('out-product');
+const outLot = document.getElementById('out-lot');
+
+function showMessage(target, text, type='success') {
+    target.innerHTML = `<div class="message ${type}">${text}</div>`;
+}
+
+async function loadProducts() {
+    const res = await fetch('/products?is_active=true');
+    const products = await res.json();
+    outProduct.innerHTML = '';
+    products.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.product_id;
+        option.textContent = `${p.product_code} - ${p.product_name}`;
+        outProduct.appendChild(option);
+    });
+    if (products.length) {
+        loadLots(products[0].product_id);
+    }
+}
+
+async function loadLots(productId) {
+    outLot.innerHTML = '';
+    const res = await fetch(`/lots?product_id=${productId}&is_active=true`);
+    const lots = await res.json();
+    lots.forEach(l => {
+        const option = document.createElement('option');
+        option.value = l.lot_id;
+        option.textContent = `${l.mfg_date} / ${l.lot_no}`;
+        outLot.appendChild(option);
+    });
+}
+
+outProduct.addEventListener('change', (e) => loadLots(e.target.value));
+
+document.getElementById('outbound-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const qty = parseInt(document.getElementById('out-qty').value, 10);
+    if (!Number.isInteger(qty) || qty < 1) {
+        return showMessage(outMessage, '수량은 1 이상 정수여야 합니다.', 'error');
+    }
+    const payload = {
+        product_id: parseInt(outProduct.value, 10),
+        lot_id: parseInt(outLot.value, 10),
+        qty,
+        ref_doc: document.getElementById('out-ref').value.trim() || null,
+        note: document.getElementById('out-note').value.trim() || null,
+    };
+    if (!payload.product_id || !payload.lot_id) {
+        return showMessage(outMessage, '필수 항목을 입력하세요.', 'error');
+    }
+
+    async function sendOut(confirmShortage = false) {
+        const res = await fetch('/inventory/out', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ ...payload, confirm_shortage: confirmShortage }) });
+        if (res.status === 409) {
+            const detail = await res.json();
+            if (confirm('재고가 부족합니다. 그래도 진행하시겠습니까?')) {
+                return sendOut(true);
+            }
+            return showMessage(outMessage, `현재고 부족: ${detail.current_qty ?? 0}`, 'error');
+        }
+        if (res.ok) {
+            showMessage(outMessage, '출고가 저장되었습니다.');
+            document.getElementById('out-qty').value = '';
+        } else {
+            showMessage(outMessage, '요청 처리 중 오류가 발생했습니다.', 'error');
+        }
+    }
+
+    sendOut(false);
+});
+
+loadProducts();
+</script>
+</body>
+</html>

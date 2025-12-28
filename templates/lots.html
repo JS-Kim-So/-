@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로트 관리</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <div class="brand">재고 관리</div>
+        <nav>
+            <a href="/" data-page="dashboard">대시보드</a>
+            <a href="/ui/products" data-page="products">제품 관리</a>
+            <a href="/ui/lots" data-page="lots">로트 관리</a>
+            <a href="/ui/inbound" data-page="inbound">입고 등록</a>
+            <a href="/ui/outbound" data-page="outbound">출고 등록</a>
+            <a href="/ui/transactions" data-page="transactions">입출고 이력</a>
+            <a href="/docs" target="_blank">API 문서</a>
+        </nav>
+    </aside>
+    <main class="content">
+        <h1 class="page-title">로트 관리</h1>
+        <div class="card">
+            <h3>로트 등록</h3>
+            <form id="lot-form" class="form-row">
+                <div>
+                    <div class="label">제품 선택 *</div>
+                    <select id="lot-product" required></select>
+                </div>
+                <div>
+                    <div class="label">생산일자 *</div>
+                    <input type="date" id="lot-mfg" required>
+                </div>
+                <div>
+                    <div class="label">로트번호 *</div>
+                    <input type="text" id="lot-no" placeholder="예: LOT-001" required>
+                </div>
+                <div class="actions">
+                    <button type="submit">등록</button>
+                </div>
+            </form>
+            <div id="lot-message"></div>
+        </div>
+
+        <div class="card">
+            <h3>로트 목록</h3>
+            <div class="form-row">
+                <div>
+                    <div class="label">제품 필터</div>
+                    <select id="lot-filter-product"></select>
+                </div>
+                <div>
+                    <div class="label">생산일자 (시작)</div>
+                    <input type="date" id="lot-filter-from">
+                </div>
+                <div>
+                    <div class="label">생산일자 (종료)</div>
+                    <input type="date" id="lot-filter-to">
+                </div>
+                <div>
+                    <div class="label">로트번호</div>
+                    <input type="text" id="lot-filter-no" placeholder="검색">
+                </div>
+                <div class="actions">
+                    <button id="lot-search">검색</button>
+                    <button id="lot-refresh">새로고침</button>
+                </div>
+            </div>
+            <table class="table" id="lot-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>제품 ID</th>
+                        <th>생산일자</th>
+                        <th>로트번호</th>
+                        <th>상태</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </main>
+</div>
+<script>
+const currentPath = window.location.pathname;
+document.querySelectorAll('.sidebar a').forEach(link => {
+    if (link.getAttribute('href') === currentPath) link.classList.add('active');
+});
+
+const lotMessage = document.getElementById('lot-message');
+const lotProduct = document.getElementById('lot-product');
+const lotFilterProduct = document.getElementById('lot-filter-product');
+const lotTableBody = document.querySelector('#lot-table tbody');
+
+function showMessage(target, text, type='success') {
+    target.innerHTML = `<div class="message ${type}">${text}</div>`;
+}
+
+async function loadProductsInto(selectEl) {
+    selectEl.innerHTML = '';
+    const res = await fetch('/products');
+    const products = await res.json();
+    products.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.product_id;
+        option.textContent = `${p.product_code} - ${p.product_name}`;
+        selectEl.appendChild(option);
+    });
+}
+
+async function loadLots() {
+    const params = new URLSearchParams();
+    const productId = lotFilterProduct.value;
+    const from = document.getElementById('lot-filter-from').value;
+    const to = document.getElementById('lot-filter-to').value;
+    const lotNo = document.getElementById('lot-filter-no').value.trim();
+    if (productId) params.append('product_id', productId);
+    if (from) params.append('mfg_date_from', from);
+    if (to) params.append('mfg_date_to', to);
+    if (lotNo) params.append('lot_no', lotNo);
+    const res = await fetch(`/lots?${params.toString()}`);
+    const lots = await res.json();
+    lotTableBody.innerHTML = '';
+    lots.forEach(l => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${l.lot_id}</td><td>${l.product_id}</td><td>${l.mfg_date}</td><td>${l.lot_no}</td><td>${l.is_active ? '사용' : '미사용'}</td>`;
+        lotTableBody.appendChild(tr);
+    });
+}
+
+document.getElementById('lot-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+        product_id: parseInt(lotProduct.value, 10),
+        mfg_date: document.getElementById('lot-mfg').value,
+        lot_no: document.getElementById('lot-no').value.trim(),
+    };
+    if (!payload.product_id || !payload.mfg_date || !payload.lot_no) {
+        return showMessage(lotMessage, '필수 항목을 입력하세요.', 'error');
+    }
+    const res = await fetch('/lots', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+    if (res.ok) {
+        showMessage(lotMessage, '로트가 등록되었습니다.');
+        loadLots();
+    } else {
+        showMessage(lotMessage, '요청 처리 중 오류가 발생했습니다.', 'error');
+    }
+});
+
+document.getElementById('lot-search').addEventListener('click', (e) => {
+    e.preventDefault();
+    loadLots();
+});
+
+document.getElementById('lot-refresh').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('lot-filter-product').value = '';
+    document.getElementById('lot-filter-from').value = '';
+    document.getElementById('lot-filter-to').value = '';
+    document.getElementById('lot-filter-no').value = '';
+    loadLots();
+});
+
+async function initLotsPage() {
+    await loadProductsInto(lotProduct);
+    await loadProductsInto(lotFilterProduct);
+    const emptyOption = document.createElement('option');
+    emptyOption.value = '';
+    emptyOption.textContent = '전체';
+    lotFilterProduct.prepend(emptyOption);
+    loadLots();
+}
+
+initLotsPage();
+</script>
+</body>
+</html>

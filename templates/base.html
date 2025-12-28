@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>재고 관리</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="layout">
+        <aside class="sidebar">
+            <div class="brand">재고 관리</div>
+            <nav>
+                <a href="/" class="{{ 'active' if page == 'dashboard' else '' }}">대시보드</a>
+                <a href="/ui/products" class="{{ 'active' if page == 'products' else '' }}">제품 관리</a>
+                <a href="/ui/lots" class="{{ 'active' if page == 'lots' else '' }}">로트 관리</a>
+                <a href="/ui/inbound" class="{{ 'active' if page == 'inbound' else '' }}">입고 등록</a>
+                <a href="/ui/outbound" class="{{ 'active' if page == 'outbound' else '' }}">출고 등록</a>
+                <a href="/ui/transactions" class="{{ 'active' if page == 'transactions' else '' }}">입출고 이력</a>
+                <a href="/docs" target="_blank">API 문서</a>
+            </nav>
+        </aside>
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>
