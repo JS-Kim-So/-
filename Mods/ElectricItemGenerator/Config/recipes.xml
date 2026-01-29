@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+    <append xpath="/recipes">
+        <recipe name="electricItemGenerator" count="1" craft_time="20" craft_area="workbench" >
+            <ingredient name="forgedIron" count="30" />
+            <ingredient name="electricalParts" count="20" />
+            <ingredient name="mechanicalParts" count="10" />
+            <ingredient name="ductTape" count="10" />
+            <ingredient name="spring" count="10" />
+            <ingredient name="oil" count="5" />
+        </recipe>
+    </append>
+</configs>

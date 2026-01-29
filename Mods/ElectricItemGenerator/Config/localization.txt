@@ -1,0 +1,4 @@
+Key,Source,Context,Changes,English,Japanese,Korean
+blockElectricItemGenerator,electricItemGenerator,Blocks,,Electric Item Generator,,전기 아이템 생성기
+itemElectricItemGenerator,electricItemGenerator,Items,,Electric Item Generator,,전기 아이템 생성기
+electricItemGeneratorDesc,electricItemGenerator,Blocks,,Electric-only generator that fabricates survival supplies without inputs.,,전기만으로 생존 아이템을 생산하는 제작기입니다.

@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "powerConsumption": 10,
+  "outputSlots": 12,
+  "queueSize": 1,
+  "categories": [
+    {
+      "id": "raw_materials",
+      "label": "Raw Materials",
+      "items": [
+        {"item": "stone", "craftTimeSeconds": 2},
+        {"item": "ironOre", "craftTimeSeconds": 4},
+        {"item": "leadOre", "craftTimeSeconds": 4},
+        {"item": "coal", "craftTimeSeconds": 3},
+        {"item": "nitratePowder", "craftTimeSeconds": 3},
+        {"item": "oil", "craftTimeSeconds": 6}
+      ]
+    },
+    {
+      "id": "ingots",
+      "label": "Ingots",
+      "items": [
+        {"item": "iron", "craftTimeSeconds": 20},
+        {"item": "lead", "craftTimeSeconds": 20},
+        {"item": "brass", "craftTimeSeconds": 25},
+        {"item": "steel", "craftTimeSeconds": 100}
+      ]
+    },
+    {
+      "id": "ammo_parts",
+      "label": "Ammo & Parts",
+      "items": [
+        {"item": "gunPowder", "craftTimeSeconds": 8},
+        {"item": "bulletCasing9mm", "craftTimeSeconds": 6},
+        {"item": "bulletTip9mm", "craftTimeSeconds": 6},
+        {"item": "bullet9mm", "craftTimeSeconds": 10},
+        {"item": "mechanicalParts", "craftTimeSeconds": 15},
+        {"item": "electricalParts", "craftTimeSeconds": 15}
+      ]
+    },
+    {
+      "id": "medical",
+      "label": "Medical",
+      "items": [
+        {"item": "bandage", "craftTimeSeconds": 12},
+        {"item": "firstAidBandage", "craftTimeSeconds": 40},
+        {"item": "firstAidKit", "craftTimeSeconds": 90},
+        {"item": "antibiotics", "craftTimeSeconds": 120},
+        {"item": "painkillers", "craftTimeSeconds": 45}
+      ]
+    },
+    {
+      "id": "food",
+      "label": "Food & Ingredients",
+      "items": [
+        {"item": "bottledWater", "craftTimeSeconds": 15},
+        {"item": "boiledMeat", "craftTimeSeconds": 25},
+        {"item": "grilledMeat", "craftTimeSeconds": 25},
+        {"item": "baconAndEggs", "craftTimeSeconds": 40},
+        {"item": "corn", "craftTimeSeconds": 12},
+        {"item": "potato", "craftTimeSeconds": 12}
+      ]
+    },
+    {
+      "id": "building",
+      "label": "Building Materials",
+      "items": [
+        {"item": "concreteMix", "craftTimeSeconds": 35},
+        {"item": "cement", "craftTimeSeconds": 30},
+        {"item": "rebarFrame", "craftTimeSeconds": 20},
+        {"item": "woodPlank", "craftTimeSeconds": 6},
+        {"item": "wood", "craftTimeSeconds": 4}
+      ]
+    }
+  ]
+}
