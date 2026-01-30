@@ -4,6 +4,7 @@
 
 한국어 설명서는 `README_KO.md`를 참고하세요.
 배포용 ZIP은 `pack_mod.sh`로 생성할 수 있습니다.
+DLL 빌드 방법도 `README_KO.md`에 단계별로 정리했습니다.
 
 ## 설치 방법
 

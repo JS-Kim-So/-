@@ -37,6 +37,32 @@ Mods/ElectricItemGenerator/
 2. C# 코드를 빌드해 DLL을 `Mods/ElectricItemGenerator/bin/ElectricItemGenerator.dll`로 배치합니다.
 3. 게임 실행 후 워크벤치에서 `전기 아이템 생성기`를 제작합니다.
 
+### Windows + Visual Studio 설치 기준 (쉬운 DLL 빌드 방법)
+
+아래는 **코드를 모르는 사용자**도 따라할 수 있는 단계입니다.
+
+1. **Visual Studio Community 실행**
+2. **새 프로젝트 만들기** → **클래스 라이브러리(.NET Framework)** 선택
+3. 프로젝트 이름을 `ElectricItemGenerator`로 설정하고 생성
+4. 생성된 프로젝트에서 **기존 파일(Class1.cs)** 는 삭제
+5. `Mods/ElectricItemGenerator/Scripts` 폴더에 있는 `.cs` 파일을 모두 프로젝트에 추가
+   - `BlockElectricItemGenerator.cs`
+   - `ElectricItemGeneratorMod.cs`
+   - `ProductionTable.cs`
+   - `TileEntityElectricItemGenerator.cs`
+6. **참조 추가**(프로젝트 우클릭 → 참조 추가)
+   - `7 Days To Die\7DaysToDie_Data\Managed` 폴더에서 아래 DLL 추가
+     - `Assembly-CSharp.dll`
+     - `UnityEngine.dll`
+     - `UnityEngine.CoreModule.dll`
+7. **빌드(Build)** 실행
+8. 빌드된 DLL을 다음 위치에 복사
+   ```
+   7 Days To Die\Mods\ElectricItemGenerator\bin\ElectricItemGenerator.dll
+   ```
+
+> `bin` 폴더가 없으면 직접 만들어 주세요.
+
 ### 쉬운 설치(압축 배포용 구조)
 
 다음과 같은 폴더 구조를 그대로 `Mods` 폴더 아래에 넣으면 됩니다.
