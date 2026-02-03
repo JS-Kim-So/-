@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+    <append xpath="/items">
+        <item name="electricItemGenerator">
+            <property name="Extends" value="workbench" />
+            <property name="CustomIcon" value="workbench" />
+            <property name="DisplayType" value="block" />
+            <property name="DescriptionKey" value="electricItemGeneratorDesc" />
+            <property name="Group" value="Workstations" />
+            <property name="Material" value="Mmetal" />
+            <property name="Stacknumber" value="1" />
+            <property name="HoldType" value="45" />
+            <property name="Meshfile" value="#Other/Workstations/workbenchPrefab" />
+        </item>
+    </append>
+</configs>

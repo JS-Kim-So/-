@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configs>
+    <append xpath="/blocks">
+        <block name="electricItemGenerator">
+            <property name="Extends" value="workbench" />
+            <property name="Class" value="BlockElectricItemGenerator" />
+            <property name="DescriptionKey" value="electricItemGeneratorDesc" />
+            <property name="PowerItem" value="electricItemGenerator" />
+            <property name="PowerConsumption" value="10" />
+            <property name="PowerType" value="Consumer" />
+            <property name="AllowPickup" value="true" />
+            <property name="PickupItem" value="electricItemGenerator" />
+            <property name="IsTerrainDecoration" value="false" />
+            <property name="IsPowered" value="true" />
+            <property name="TileEntityClass" value="TileEntityElectricItemGenerator" />
+            <property name="WorkstationSound" value="workbench_working" />
+            <property name="CreativeMode" value="Player" />
+        </block>
+    </append>
+</configs>
